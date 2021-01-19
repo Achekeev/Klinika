@@ -1,0 +1,36 @@
+version: '3.3'
+
+services:
+#  db:
+#    image: library/postgres:12
+#    environment:
+#      - POSTGRES_DB=pubg
+#      - POSTGRES_USER=pubg_admin
+#      - POSTGRES_PASSWORD=password
+#    ports:
+#      - "5432:5432"
+  web:
+    build: .
+    #command: gunicorn klinika.wsgi:application --bind 0.0.0.0:8080
+    command: ./manage.py runserver 8001
+    volumes:
+      - .:/klinika
+#      - ./nginx:/etc/nginx/conf.d
+      - /static:/static
+    ports:
+      - "8001:8001"
+#    depends_on:
+#      - db
+#    links:
+#      - db
+#  nginx:
+#    build:
+#      context: ./nginx
+#      dockerfile: Dockerfile
+#    volumes:
+#      - /static:/static
+#
+#    ports:
+#      - 80:80
+#    depends_on:
+#      - web
