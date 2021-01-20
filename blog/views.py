@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.utils.crypto import get_random_string
 from rest_framework import permissions, generics, request, mixins
 from rest_framework.generics import get_object_or_404
@@ -14,11 +13,7 @@ from .models import Client, PhoneOTP
 from django.db.models import Q
 import requests
 from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.response import Response
-from rest_framework import request
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
 
 class LoginAPI(KnoxLoginView):
@@ -66,17 +61,6 @@ class UserProfileChangeAPIView(generics.RetrieveAPIView, mixins.DestroyModelMixi
     parser_classes = (MultiPartParser, FormParser,)
     queryset = Client.objects.all()
 
-    # def get(self, request):
-    #     user_phone = User.phone
-    #     obj = get_object_or_404(User, phone=user_phone)
-    #     new_phone = request.data.get('new_phone')
-    #     if user_phone.exists():
-    #         otp = send_otp(new_phone)
-    #         PhoneOTP.objects.create(
-    #         phone=new_phone,
-    #         otp=otp,
-    #                 )
-    #     return obj
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)

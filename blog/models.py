@@ -90,8 +90,8 @@ class Client(AbstractBaseUser):
         return self.active
 
     class Meta:
-        verbose_name = 'Client'
-        verbose_name_plural = 'Clients'
+        verbose_name = 'Клиенты'
+        verbose_name_plural = 'Клиенты'
 
 
 class PhoneOTP(models.Model):
