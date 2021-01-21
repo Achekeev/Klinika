@@ -1,9 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework.serializers import ModelSerializer
-from .models import Client
-# from django.contrib.auth import get_user_model
-# User = get_user_model()
+from .models import User
+from django.contrib.auth import get_user_model
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -11,13 +10,13 @@ class CreateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = Client
-        fields = ('phone', 'password', 'name')
+        model = User
+        fields = ('pk', 'phone', 'password', 'name')
         extra_kwargs = {'password': {'write_only': True}, }
 
     def create(self, validated_data):
-        user = Client.objects.create_user(validated_data['phone'], password=validated_data['password'],
-                                          name=validated_data['name'])
+        user = User.objects.create_user(validated_data['phone'], password=validated_data['password'],
+                                        name=validated_data['name'])
         return user
 
 
@@ -26,8 +25,8 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     User model w/o password
     """
     class Meta:
-        model = Client
-        fields = ('pk', 'phone', 'name', 'balance')
+        model = User
+        fields = ('pk', 'phone', 'name', 'balance', 'avatar', 'total_kills')
 
 
 class LoginUserSerializer(serializers.Serializer):
@@ -40,10 +39,9 @@ class LoginUserSerializer(serializers.Serializer):
         password = attrs.get('password')
 
         if phone and password:
-            if Client.objects.filter(phone=phone).exists():
+            if User.objects.filter(phone=phone).exists():
                 user = authenticate(request=self.context.get('request'),
                                     phone=phone, password=password)
-
             else:
                 msg = {'detail': 'Phone number is not registered.',
                        'register': False}
@@ -82,12 +80,12 @@ class UserPhoneChangeSerializer(ModelSerializer):
 
 
     class Meta:
-        model = Client
+        model = User
         fields = ['phone', 'name', 'avatar']
 
     def validate_name(self, value):
         user = self.context['request'].user
-        if Client.objects.exclude(pk=user.pk).filter(name=value).exists():
+        if User.objects.exclude(pk=user.pk).filter(name=value).exists():
             raise serializers.ValidationError({"name": "This username is already in use."})
         return value
 

@@ -51,7 +51,7 @@ CHOICES = [
 ]
 
 
-class Client(AbstractBaseUser):
+class User(AbstractBaseUser):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,20}$', message='+996111222333')
     phone = models.CharField(validators=[phone_regex], max_length=30, unique=True)
     name = models.CharField(max_length=255, unique=True, blank=True, null=True)
@@ -65,17 +65,29 @@ class Client(AbstractBaseUser):
     staff = models.BooleanField(default=False, verbose_name='is staff')
     admin = models.BooleanField(default=False)
     balance = models.IntegerField(default=0)
+    objects = UserManager()
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['name', ]
 
-    objects = UserManager()
+    class Meta:
+        verbose_name = 'Клиенты'
+        verbose_name_plural = 'Клиенты'
 
     def __str__(self):
         return f'{self.phone}-{self.name}'
 
-    def get_name(self):
+    def get_nickname(self):
         return self.phone
+
+    def get_full_name(self):
+        return self.phone
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
 
     @property
     def is_staff(self):
@@ -88,10 +100,6 @@ class Client(AbstractBaseUser):
     @property
     def is_active(self):
         return self.active
-
-    class Meta:
-        verbose_name = 'Клиенты'
-        verbose_name_plural = 'Клиенты'
 
 
 class PhoneOTP(models.Model):

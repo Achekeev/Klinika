@@ -3,6 +3,9 @@ from .views import ValidateOTP, ValidatePhoneSendOTP, \
     ValidatePhoneForgot, ForgotValidateOTP, RegisterView, UserAPI, \
     ForgetPasswordChange, LoginAPI, UserProfileChangeAPIView
 from knox import views as knox_views
+from django.conf.urls.static import static
+from django.conf import settings
+
 
 urlpatterns = [
     path('register/', RegisterView.as_view()),

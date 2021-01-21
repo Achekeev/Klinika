@@ -7,13 +7,17 @@ from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
 from xml.etree import ElementTree as ET
 from .utils import otp_generator
-from .serializers import CreateUserSerializer, ForgetPasswordSerializer, ChangePasswordSerializer, \
+from .serializers import CreateUserSerializer, ForgetPasswordSerializer, ChangePasswordSerializer,\
     UserDetailsSerializer, LoginUserSerializer, UserPhoneChangeSerializer
-from .models import Client, PhoneOTP
+from .models import User, PhoneOTP
 from django.db.models import Q
 import requests
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework import request
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 
 class LoginAPI(KnoxLoginView):
@@ -40,8 +44,8 @@ class UserAPI(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.AllowAny, ]
     serializer_class = UserDetailsSerializer
 
-    def get_object(self, ):
-        return get_object_or_404(Client, id=self.request.user.id)
+    def get_object(self,):
+        return get_object_or_404(User, id=self.request.user.id)
 
 
 class UserIsOwnerOrReadOnly(permissions.BasePermission):
@@ -51,7 +55,9 @@ class UserIsOwnerOrReadOnly(permissions.BasePermission):
         return obj.id == request.user.id
 
 
-class UserProfileChangeAPIView(generics.RetrieveAPIView, mixins.DestroyModelMixin, mixins.UpdateModelMixin):
+class UserProfileChangeAPIView(generics.RetrieveAPIView,
+                               mixins.DestroyModelMixin,
+                               mixins.UpdateModelMixin):
     """Изменение номера телефона, аватар, имя """
     permission_classes = (
         permissions.IsAuthenticated,
@@ -59,8 +65,19 @@ class UserProfileChangeAPIView(generics.RetrieveAPIView, mixins.DestroyModelMixi
     )
     serializer_class = UserPhoneChangeSerializer
     parser_classes = (MultiPartParser, FormParser,)
-    queryset = Client.objects.all()
+    queryset = User.objects.all()
 
+    # def get(self, request):
+    #     user_phone = User.phone
+    #     obj = get_object_or_404(User, phone=user_phone)
+    #     new_phone = request.data.get('new_phone')
+    #     if user_phone.exists():
+    #         otp = send_otp(new_phone)
+    #         PhoneOTP.objects.create(
+    #         phone=new_phone,
+    #         otp=otp,
+    #                 )
+    #     return obj
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
@@ -79,7 +96,7 @@ def send_sms_otp(phone_number, message):
         <login>{login}</login>
         <pwd>{password}</pwd>\n
         <id>{message_id}</id>
-        <sender>riom.kg</sender>
+        <sender>Agameskg</sender>
         <text>{message}</text>
         <time></time>
         <phones>
@@ -125,7 +142,7 @@ def send_otp_forgot(phone):
         key = otp_generator()
         phone = str(phone)
         otp_key = str(key)
-        user = get_object_or_404(Client, phone__iexact=phone)
+        user = get_object_or_404(User, phone__iexact=phone)
         if user.name:
             name = user.name
         else:
@@ -151,7 +168,7 @@ class ValidatePhoneSendOTP(APIView):
         phone_number = request.data.get('phone')
         if phone_number:
             phone = str(phone_number)
-            user = Client.objects.filter(phone__iexact=phone)
+            user = User.objects.filter(phone__iexact=phone)
             if user.exists():
                 return Response({'status': False, 'detail': 'Phone Number already exists'})
                 # logic to send the otp and store the phone number and that otp in table.
@@ -184,19 +201,20 @@ class ValidatePhoneSendOTP(APIView):
                         'status': 'False', 'detail': "OTP sending error. Please try after some time."
                     })
             return Response({
-                'status': True, 'detail': 'Otp has been sent successfully.'
-            })
+                    'status': True, 'detail': 'Otp has been sent successfully.'
+                })
         else:
             return Response({
                 'status': 'False', 'detail': "I haven't received any phone number. Please do a POST request."
             })
 
 
+
 class ValidateOTP(APIView):
-    """
+    '''
     If you have received otp, post a request with phone and that otp and you will be redirected to set the password
 
-    """
+    '''
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone', False)
@@ -225,24 +243,25 @@ class ValidateOTP(APIView):
                     'status': False,
                     'detail': 'Phone not recognised. Kindly request a new otp with this number'
                 })
+
+
         else:
             return Response({
                 'status': 'False',
-                'detail': 'Either phone or otp was not received in Post request'
+                'detail': 'Either phone or otp was not recieved in Post request'
             })
 
 
 class RegisterView(APIView):
-    """Takes phone and a password and creates a new user only if otp was verified and phone is new"""
+    '''Takes phone and a password and creates a new user only if otp was verified and phone is new'''
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone', False)
         password = request.data.get('password', False)
         name = request.data.get('name', False)
-
         if phone and password:
             phone = str(phone)
-            user = Client.objects.filter(phone__iexact=phone)
+            user = User.objects.filter(phone__iexact=phone)
             if user.exists():
                 return Response({'status': False,
                                  'detail': 'Phone Number already have account associated. Kindly try forgot password'})
@@ -274,18 +293,19 @@ class RegisterView(APIView):
         else:
             return Response({
                 'status': False,
-                'detail': 'Either phone or password was not received in Post request'
+                'detail': 'Either phone or password was not recieved in Post request'
             })
 
 
 class ValidatePhoneForgot(APIView):
-    """Validate if account is there for a given phone number and then send otp for forgot password reset"""
+    '''
+    Validate if account is there for a given phone number and then send otp for forgot password reset'''
 
     def post(self, request, *args, **kwargs):
         phone_number = request.data.get('phone')
         if phone_number:
             phone = str(phone_number)
-            user = Client.objects.filter(phone__iexact=phone)
+            user = User.objects.filter(phone__iexact=phone)
             if user.exists():
                 otp = send_otp_forgot(phone)
                 print(phone, otp)
@@ -331,10 +351,10 @@ class ValidatePhoneForgot(APIView):
 
 
 class ForgotValidateOTP(APIView):
-    """
-    If you have received an otp, post a request with phone and that otp and you will be redirected to reset
-     the forgotted password
-    """
+    '''
+    If you have received an otp, post a request with phone and that otp and you will be redirected to reset  the forgotted password
+
+    '''
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone', False)
@@ -369,6 +389,8 @@ class ForgotValidateOTP(APIView):
                     'status': False,
                     'detail': 'Phone not recognised. Kindly request a new otp with this number'
                 })
+
+
         else:
             return Response({
                 'status': False,
@@ -377,10 +399,9 @@ class ForgotValidateOTP(APIView):
 
 
 class ForgetPasswordChange(APIView):
-    """
-    if forgot_logged is valid and account exists then only pass otp, phone and password to reset the password.
-     All three should match.APIView
-    """
+    '''
+    if forgot_logged is valid and account exists then only pass otp, phone and password to reset the password. All three should match.APIView
+    '''
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone', False)
@@ -396,7 +417,7 @@ class ForgetPasswordChange(APIView):
                         'phone': phone,
                         'password': password
                     }
-                    user_obj = get_object_or_404(Client, phone__iexact=phone)
+                    user_obj = get_object_or_404(User, phone__iexact=phone)
                     serializer = ForgetPasswordSerializer(data=post_data)
                     serializer.is_valid(raise_exception=True)
                     if user_obj:
@@ -405,25 +426,25 @@ class ForgetPasswordChange(APIView):
                         user_obj.save()
                         old.delete()
                         return Response({
-                            'status': True,
-                            'detail': 'Password changed successfully. Please Login'
+                            'status' : True,
+                            'detail' : 'Password changed successfully. Please Login'
                         })
 
                 else:
                     return Response({
-                        'status': False,
-                        'detail': 'OTP Verification failed. Please try again in previous step'
-                    })
+                'status' : False,
+                'detail' : 'OTP Verification failed. Please try again in previous step'
+                                 })
 
             else:
                 return Response({
-                    'status': False,
-                    'detail': 'Phone and otp are not matching or a new phone has entered. Request a new otp in forgot password'
-                })
+                'status': False,
+                'detail': 'Phone and otp are not matching or a new phone has entered. Request a new otp in forgot password'
+            })
 
         else:
             return Response({
 
-                'status': False,
-                'detail': 'Post request have parameters missing.'
+                'status' : False,
+                'detail' : 'Post request have parameters mising.'
             })

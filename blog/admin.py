@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 from django.contrib.auth import get_user_model
 from django.contrib import admin
 from .forms import UserAdminCreationForm, UserAdminChangeForm
-# Client = get_user_model()
+# User = get_user_model()
 
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import PhoneOTP, Client
+from .models import PhoneOTP, User
 
 admin.site.register(PhoneOTP)
 
@@ -46,5 +46,5 @@ class UserAdmin(BaseUserAdmin):
         verbose_name_plural = "Пользователи"
 
 
-admin.site.register(Client, UserAdmin)
+admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)

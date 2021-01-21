@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from .models import Client
+from .models import User
+
 
 
 class APIForm(forms.Form):
@@ -34,12 +35,12 @@ class RegisterForm(forms.ModelForm):
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     class Meta:
-        model = Client
+        model = User
         fields = ('phone',)
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
-        qs = Client.objects.filter(phone=phone)
+        qs = User.objects.filter(phone=phone)
         if qs.exists():
             raise forms.ValidationError('Phone is already in use')
         return phone
@@ -71,7 +72,7 @@ class UserAdminCreationForm(forms.ModelForm):
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
     class Meta:
-        model = Client
+        model = User
         fields = ('phone',)
 
     def clean_password2(self):
@@ -94,13 +95,13 @@ class UserAdminCreationForm(forms.ModelForm):
 
 class UserAdminChangeForm(forms.ModelForm):
     """A form for updating users. Includes all the fields on
-    the user, but replaces the password field with admin
+    the user, but replaces the password field with admin's
     password hash display field.
     """
     password = ReadOnlyPasswordHashField()
 
     class Meta:
-        model = Client
+        model = User
         fields = ('phone', 'password', 'active', 'admin')
 
     def clean_password(self):

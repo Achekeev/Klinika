@@ -42,3 +42,25 @@ class Blogs(models.Model):
     class Meta:
         verbose_name = 'Блог'
         verbose_name_plural = 'Блог'
+
+
+class Asks(models.Model):
+    fio = models.CharField(max_length=100, verbose_name='ФИО')
+    phone = models.CharField(max_length=30, verbose_name='Номер телефона')
+    mail = models.EmailField(verbose_name='Почта')
+    message = models.CharField(max_length=2000, verbose_name='Сообщение')
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    class Meta:
+        verbose_name = 'Вопросы'
+        verbose_name_plural = 'Вопросы'
+
+
+class Feedback(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Имя')
+    photo = models.ImageField(verbose_name='Фото')
+    feedback = models.CharField(max_length=2000, verbose_name='Отзыв')
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзыв'
