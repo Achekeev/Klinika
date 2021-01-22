@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Works, Blogs, Asks, Feedback
+from .models import Works, Blogs, Asks, Feedback, Online
 
 
 @admin.register(Works)
@@ -39,3 +39,9 @@ class AsksAdmin(admin.ModelAdmin):
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ['name', ]
     readonly_fields = ('name', 'photo', 'feedback')
+
+
+@admin.register(Online)
+class OnlineAdmin(admin.ModelAdmin):
+    list_display = ['fio', ]
+    readonly_fields = ('fio', 'phone', 'opera', 'message')

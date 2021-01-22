@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from .serializers import WorksCreateSerializer, BlogsCreateSerializer, FeedbackCreateSerializer
 
-from .models import Works, Blogs, Asks, Feedback
+from .models import Works, Blogs, Asks, Feedback, Online
 
 
 class WorksView(ListCreateAPIView):
@@ -28,7 +28,7 @@ class AsksView(APIView):
             user = Asks.objects.create(fio=name, phone=phone, mail=email, message=message)
             return Response(status=201, data={'status': True, 'message': 'Good job'})
         except:
-            return Response(status=401, data={'status': True, 'message': 'Can not create this asks'})
+            return Response(status=401, data={'status': False, 'message': 'Can not create this asks'})
 
 
 class FeedbackView(APIView):
@@ -46,4 +46,19 @@ class FeedbackView(APIView):
             user = Feedback.objects.create(name=name, photo=photo, feedback=feedback)
             return Response(status=201, data={'status': True, 'message': 'Good job'})
         except:
-            return Response(status=401, data={'status': True, 'message': 'Can not create this asks'})
+            return Response(status=401, data={'status': False, 'message': 'Can not create this feedback'})
+
+
+class OnlineView(APIView):
+    def post(self, request):
+        fio = request.data.get("fio")
+        phone = request.data.get("phone")
+        oper = request.data.get("oper")
+        message = request.data.get("message")
+
+
+        try:
+            user = Online.objects.create(fio=fio, phone=phone, opera=oper, message=message)
+            return Response(status=201, data={'status': True, 'message': 'Good job'})
+        except:
+            return Response(status=401, data={'status': False, 'message': 'Can not create'})

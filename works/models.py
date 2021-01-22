@@ -64,3 +64,14 @@ class Feedback(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзыв'
+
+
+class Online(models.Model):
+    fio = models.CharField(max_length=200, verbose_name='ФИО')
+    phone = models.CharField(max_length=200, verbose_name='Телефон')
+    opera = models.CharField(max_length=255, verbose_name='Виды операции', choices=CHOICES)
+    message = models.CharField(max_length=2000, verbose_name='Описание')
+
+    class Meta:
+        verbose_name = 'Онлайн консультация'
+        verbose_name_plural = 'Онлайн консультация'

@@ -21,3 +21,4 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = ('name', 'photo', 'feedback')
+
