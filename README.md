@@ -6,8 +6,7 @@ directory. You shall see the following files and directories:
 
       klinika/             framework source files
       works/               works
-      Pipfile/             requirement checker
-      Pipfile.lock/        requirement checker
+      requirements.txt/    requirement checker
       README               this file
 
 
@@ -33,10 +32,9 @@ Installation
 -----------
 
 
-        Install using pipenv...
-        virtualenv venv
-        source venv/bin/activate
-        pipenv run
+        Install using pip...
+        source evn/bin/activate
+        pip install -r requirements.txt
 
 
 
@@ -48,9 +46,9 @@ Let's take a look at a quick example of using Klinika
 Startup up a project like so...
 
 
-        pipenv run python3 manage.py migrate
-        pipenv run python3 manage.py createsuperuser
-        pipenv run python3 manage.py runserver
+        python3 manage.py migrate
+        python3 manage.py createsuperuser
+        python3 manage.py runserver
 
 Deploy
 -----------
@@ -59,7 +57,7 @@ Deploy
 
         sudo docker-compose build
         sudo docker-compose up -d
-        sudo docker-compose exec web pipenv run python3 manage.py makemigratons
-        sudo docker-compose exec web pipenv run python3 manage.py migrate
-        sudo docker-compose exec web pipenv run python3 manage.py collecstatic
-        sudo docker-compose exec web pipenv run python3 manage.py createsuperuser
+        sudo docker-compose exec web python3 manage.py makemigratons
+        sudo docker-compose exec web python3 manage.py migrate
+        sudo docker-compose exec web python3 manage.py collecstatic
+        sudo docker-compose exec web python3 manage.py createsuperuser

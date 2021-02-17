@@ -12,7 +12,7 @@ services:
   web:
     build: .
     #command: gunicorn klinika.wsgi:application --bind 0.0.0.0:8080
-    command: ./manage.py runserver 8001
+    command: python3 manage.py runserver 0.0.0.0:8001
     volumes:
       - .:/klinika
 #      - ./nginx:/etc/nginx/conf.d
